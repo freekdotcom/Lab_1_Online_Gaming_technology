@@ -1,5 +1,5 @@
 //#include "stdafx.h"
-//#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "Net.h"
 #include <winsock2.h>
 #include <iostream>
@@ -35,7 +35,7 @@ void Net::setupUDP(int port, char * ip)
 		memset(my_addr.sin_zero, 0, 8);
 
 		//create UDP socket and bind to my_addr
-		sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+		sockfd = socket(AF_INET, SOCK_DGRAM, IPPORT_BIFFUDP);
 		if(sockfd== INVALID_SOCKET)
 			//Log::writeToLog("Call to socket() failed");
 
@@ -62,7 +62,42 @@ void Net::setupUDP(int port, char * ip)
 }
 
 
+void Net::setupTCP(int port, char * ip) {
+	try
+	{
+		portNum = port; //port I'll be listening on
 
+						//populate my_addr structure
+		my_addr.sin_family = AF_INET;
+		my_addr.sin_port = htons(portNum);
+		my_addr.sin_addr.s_addr = inet_addr(ip);
+		memset(my_addr.sin_zero, 0, 8);
+
+		//create UDP socket and bind to my_addr
+		sockfd = socket(AF_INET, SOCK_DGRAM, IPPORT_TCPMUX);
+		if (sockfd == INVALID_SOCKET)
+			//Log::writeToLog("Call to socket() failed");
+
+			if (bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr) == SOCKET_ERROR)
+				//Log::writeToLog("Call to bind() failed");
+
+				//clear out the socket sets
+				FD_ZERO(&master);    // clear the master and temp sets
+		FD_ZERO(&read_fds);
+
+		//add the listening socket to the master set
+		FD_SET(sockfd, &master);
+
+		fdmax = sockfd;
+	}
+	catch (char* str)
+	{
+		ostringstream s;
+		s << "ERROR: " << str << endl;
+		s << "ERROR CODE: " << WSAGetLastError() << endl;
+		//Log::writeToLog(s);
+	}
+}
 /**
 returns number of bytes received
 -1 means an error occured.

@@ -1,46 +1,51 @@
-#include "Main.h"
+#include <WinSock2.h>
+#include "Net.h"
 #include <iostream>
-#include <string>
 
-using namespace std;
+#pragma comment (lib, "Ws2_32.lib")
+#pragma comment (lib, "Mswsock.lib")
+#pragma comment (lib, "AdvApi32.lib")
 
-Main::Main()
+void playerA(Net &net)
 {
-	_net.initialise();
-	string input;
-	cout << "What is da input?" << endl;
-	getline(cin, input);
+	char* ip = "127.0.0.1";
+	//net.setupUDP(28000, ip);
+	net.setupTCP(28000, ip);
+	std::cout << std::endl << "IP: 127.0.0.1" << std::endl << "Port: 28000" << std::endl;
+	while (1)
+	{
+		net.sendData(ip, 28001, "Hallo, ik ben iemand hahah");
+	}
+	
+}
+
+void playerB(Net &net)
+{
+	char* ip = "127.0.0.1";
+	net.setupUDP(28001, ip);
+	std::cout << std::endl << "IP: 127.0.0.1" << std::endl << "Port: 28001" << std::endl;
+	while (1)
+	{
+		net.sendData(ip, 28000, "Hallo, ik ben iemand hahah");
+	}
+}
+
+int main()
+{
+	Net net;
+	net.initialise();
+
+	std::string input;
+	std::cin >> input;
 
 	if (input == "a")
-		Main::PlayerA();
-	else if (input == "1")
-		exit = 1;
-	else
-		Main::PlayerB();
-
-}
-
-
-Main::~Main()
-{
-}
-
-void Main::PlayerA() {
-	
-	_net.setupUDP(PORT_A, ip);
-	cout << _net.getSenderIP() << "  " <<  _net.getSenderPort() << endl;
-}
-
-void Main::PlayerB() {
-	_net.setupUDP(PORT_B, ip);
-	cout << _net.getSenderIP() << "  " <<  _net.getSenderPort() << endl;
-
-}
-
-int main() {
-	do
 	{
-		Main::Main();
-	} while (exit == 0);
-	return 0;
+		playerA(net);
+	}
+	else if (input == "b")
+	{
+		playerB(net);
+	}
+	system("PAUSE");
 }
+

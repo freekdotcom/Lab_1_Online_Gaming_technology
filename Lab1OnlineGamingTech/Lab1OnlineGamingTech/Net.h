@@ -26,6 +26,7 @@ public:
 
     void setupUDP(int port);
 	void setupUDP(int port, char * ip);
+	void setupTCP(int port, char * ip);
     virtual void sendData(char* ip,int port,char* message);
 	int receiveData(char* message);
 	void initialise();
